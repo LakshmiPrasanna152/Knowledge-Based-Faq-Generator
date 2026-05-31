@@ -6,7 +6,7 @@ from fastapi import (
 )
 
 import io
-import PyMuPDF  # type: ignore[import]
+
 import fitz  # type: ignore[import]
 from docx import Document
 
