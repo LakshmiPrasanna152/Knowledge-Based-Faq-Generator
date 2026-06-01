@@ -88,3 +88,10 @@ USER QUESTION:
 """
 
     return await ask_ai(prompt)
+# ==========================================
+# GENERAL CHAT MODE
+# ==========================================
+
+async def ask_general_ai(question):
+
+    return await ask_ai(question)
