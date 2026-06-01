@@ -161,7 +161,7 @@ useEffect(() => {
       const response =
         await API.post(
 
-          "/chat",
+          "https://knowledge-based-faq-generator.onrender.com/chat",
 
           formData,
 
