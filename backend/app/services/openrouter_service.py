@@ -4,18 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENROUTER_API_KEY = os.getenv(
-    "OPENROUTER_API_KEY"
-)
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 
 async def ask_ai(prompt):
 
     headers = {
-        "Authorization":
-        f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type":
-        "application/json"
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
     }
 
     payload = {
@@ -26,20 +22,31 @@ async def ask_ai(prompt):
                 "content": prompt
             }
         ],
-        "temperature": 0.3
+        "temperature": 0.3,
+        "max_tokens": 1000
     }
 
-    async with httpx.AsyncClient() as client:
+    try:
 
-        response = await client.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload
-        )
+        async with httpx.AsyncClient(timeout=60) as client:
 
-    data = response.json()
+            response = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=payload
+            )
 
-    return data["choices"][0]["message"]["content"]
+        response.raise_for_status()
+
+        data = response.json()
+
+        return data["choices"][0]["message"]["content"]
+
+    except Exception as e:
+
+        print("OPENROUTER ERROR:", str(e))
+
+        return "Error connecting to AI server."
 
 
 async def ask_document_ai(
@@ -47,26 +54,37 @@ async def ask_document_ai(
     question
 ):
 
-    prompt = f"""
-You are an intelligent document assistant.
+    # If no document uploaded -> behave like ChatGPT
+    if not document_text.strip():
 
-Answer ONLY using the document.
+        return await ask_ai(question)
+
+    prompt = f"""
+You are SmartFAQ AI.
+
+RULES:
+
+1. If the user is greeting
+   (Hi, Hello, Hey, Good Morning, etc.)
+   reply naturally.
+
+2. If the user asks a general question
+   unrelated to the document,
+   answer normally like ChatGPT.
+
+3. If the question is related to the document,
+   use the document content.
+
+4. If the answer is not found in the document,
+   you may answer using your general knowledge.
 
 DOCUMENT:
+
 {document_text}
 
-QUESTION:
+USER QUESTION:
+
 {question}
-
-If answer exists in document:
-give exact answer.
-
-If answer is partially available:
-summarize it.
-
-If answer does not exist:
-say:
-'The document does not contain this information.'
 """
 
     return await ask_ai(prompt)

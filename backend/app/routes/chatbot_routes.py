@@ -6,12 +6,12 @@ from fastapi import (
 )
 
 import io
-
 import fitz  # type: ignore[import]
 from docx import Document
 
 from app.services.openrouter_service import (
-    ask_document_ai
+    ask_document_ai,
+    ask_general_ai
 )
 
 router = APIRouter()
@@ -103,20 +103,29 @@ async def chat(
 
         combined_text += "\n" + extracted_text
 
-    # NO DOCUMENT
+    # =====================================
+    # NO DOCUMENT → CHATGPT MODE
+    # =====================================
+
     if not combined_text.strip():
 
+        response = await ask_general_ai(
+            message
+        )
+
         return {
-            "response":
-            "Please upload a document first.",
+            "response": response,
             "document_text": "",
             "file_name": file_name,
         }
 
+    # =====================================
+    # DOCUMENT MODE
+    # =====================================
+
     print("QUESTION:", message)
     print("DOC LENGTH:", len(combined_text))
 
-    # AI ANALYSIS
     response = await ask_document_ai(
         combined_text,
         message
