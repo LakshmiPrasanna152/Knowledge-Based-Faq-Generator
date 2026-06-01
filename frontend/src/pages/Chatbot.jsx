@@ -4,7 +4,7 @@ import React, {
   useState,
 } from "react";
 
-import API from "../api";
+import API from "../services/api";
 
 import {
   FiPlus,
@@ -160,18 +160,14 @@ useEffect(() => {
 
       const response =
         await API.post(
-
-          "https://knowledge-based-faq-generator.onrender.com/chat",
-
-          formData,
-
-          {
-            headers: {
-              "Content-Type":
-                "multipart/form-data",
-            },
-          }
-        );
+  "/chat",
+  formData,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
 
       // ====================================
       // AI RESPONSE
