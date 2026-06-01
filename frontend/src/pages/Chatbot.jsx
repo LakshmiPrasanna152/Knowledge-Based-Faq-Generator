@@ -4,7 +4,7 @@ import React, {
   useState,
 } from "react";
 
-import axios from "axios";
+import API from "../api";
 
 import {
   FiPlus,
@@ -159,9 +159,9 @@ useEffect(() => {
     try {
 
       const response =
-        await axios.post(
+        await API.post(
 
-          "http://127.0.0.1:8000/chat",
+          "/chat",
 
           formData,
 
