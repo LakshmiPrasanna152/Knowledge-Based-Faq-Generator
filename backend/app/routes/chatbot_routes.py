@@ -1,83 +1,9 @@
-from fastapi import (
-    APIRouter,
-    UploadFile,
-    File,
-    Form
-)
-
-import io
-import fitz  # type: ignore[import]
-from docx import Document
-
-from app.services.openrouter_service import (
-    ask_document_ai,
-    ask_general_ai
-)
+from fastapi import APIRouter, UploadFile, File, Form
+from app.services.openrouter_service import ask_document_ai, ask_general_ai
+from app.services.file_reader import read_file_bytes
 
 router = APIRouter()
 
-
-# ==========================================
-# EXTRACT TEXT FROM FILES
-# ==========================================
-
-def extract_text(file_bytes, filename):
-
-    filename = filename.lower()
-
-    try:
-
-        # TXT / MD
-        if filename.endswith(".txt") or filename.endswith(".md"):
-
-            return file_bytes.decode(
-                "utf-8",
-                errors="ignore"
-            )
-
-        # PDF
-        elif filename.endswith(".pdf"):
-
-            pdf = fitz.open(
-                stream=file_bytes,
-                filetype="pdf"
-            )
-
-            text = ""
-
-            for page in pdf:
-                text += page.get_text()
-
-            pdf.close()
-
-            return text
-
-        # DOCX
-        elif filename.endswith(".docx"):
-
-            doc = Document(
-                io.BytesIO(file_bytes)
-            )
-
-            text = "\n".join(
-                para.text
-                for para in doc.paragraphs
-            )
-
-            return text
-
-        else:
-
-            return "Unsupported file format."
-
-    except Exception as e:
-
-        return f"File Read Error: {str(e)}"
-
-
-# ==========================================
-# CHAT API
-# ==========================================
 
 @router.post("/chat")
 async def chat(
@@ -85,54 +11,18 @@ async def chat(
     document_text: str = Form(""),
     file: UploadFile = File(None),
 ):
-
     combined_text = document_text
     file_name = None
 
-    # FILE UPLOAD
     if file:
-
         file_name = file.filename
-
         contents = await file.read()
-
-        extracted_text = extract_text(
-            contents,
-            file.filename
-        )
-
-        combined_text += "\n" + extracted_text
-
-    # =====================================
-    # NO DOCUMENT → CHATGPT MODE
-    # =====================================
+        extracted = read_file_bytes(contents, file.filename)
+        combined_text += "\n" + extracted
 
     if not combined_text.strip():
+        response = await ask_general_ai(message)
+        return {"response": response, "document_text": "", "file_name": file_name}
 
-        response = await ask_general_ai(
-            message
-        )
-
-        return {
-            "response": response,
-            "document_text": "",
-            "file_name": file_name,
-        }
-
-    # =====================================
-    # DOCUMENT MODE
-    # =====================================
-
-    print("QUESTION:", message)
-    print("DOC LENGTH:", len(combined_text))
-
-    response = await ask_document_ai(
-        combined_text,
-        message
-    )
-
-    return {
-        "response": response,
-        "document_text": combined_text,
-        "file_name": file_name,
-    }
+    response = await ask_document_ai(combined_text, message)
+    return {"response": response, "document_text": combined_text, "file_name": file_name}

@@ -158,8 +158,7 @@ useEffect(() => {
 
     try {
 
-      const response =
-        await API.post(
+      const response = await API.post(
   "/chat",
   formData,
   {

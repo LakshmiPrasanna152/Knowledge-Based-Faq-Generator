@@ -2,10 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.chatbot_routes import router as chatbot_router
+from app.routes.faq_routes import router as faq_router
 
-app = FastAPI()
+app = FastAPI(title="Knowledge-Based FAQ Generator API")
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,12 +14,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# TEST ROUTE
 @app.get("/")
 def home():
-    return {
-        "message": "Knowledge-Based FAQ Backend Running"
-    }
+    return {"message": "Knowledge-Based FAQ Backend Running", "status": "ok"}
 
-# CHAT ROUTE
+# /chat
 app.include_router(chatbot_router)
+
+# /generate-faq  /summarize  /compare-docs  /extract-keywords  /rewrite-tone
+app.include_router(faq_router)
