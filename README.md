@@ -369,12 +369,25 @@ Distributed under the MIT License.
 See the LICENSE file for more information.
 
 ---
+Contact / Support  
 
-##  Developed By
+For questions, bug reports, feature requests, or collaboration opportunities:
 
+Developer
 
+ Lakshmi Prasanna
 
-**Knowledge-Based FAQ Generator Using AI**
+Email: pujarilakshmiprasanna152@gmail.com
 
-Technologies Used:
-React.js • FastAPI • Firebase • OpenRouter API • SQLite • Tailwind CSS • Python • Vercel • Render
+GitHub Profile:
+
+https://github.com/LakshmiPrasanna152
+
+Project Repository:
+
+https://github.com/LakshmiPrasanna152/knowledge-based-faq-generator
+Report Issues
+
+If you encounter a bug or want to request a feature, please open an issue:
+
+https://github.com/LakshmiPrasanna152/knowledge-based-faq-generator/issues
